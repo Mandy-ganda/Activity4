@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-copy">
+    <p class="hero-hello">Hi, I'm</p>
+    <h1 class="hero-name">{{ p.nickname }}</h1>
+    <p class="hero-typed" aria-label="I'm a {{ p.typed|join(', ') }}">I'm a <span id="typed" data-phrases='{{ p.typed|tojson|forceescape }}'>{{ p.typed[0] }}</span><span class="caret" aria-hidden="true"></span></p>
+    <p class="hero-role">{{ p.course }} student at {{ p.school }}.</p>
+    <div class="hero-actions">
+      <a class="btn" href="{{ url_for('profile') }}">See my profile</a>
+      <a class="btn btn-ghost" href="{{ url_for('contact') }}">Contact me</a>
+    </div>
+  </div>
+
+  <div class="hero-art">
+    <div class="arch">
+      {% if has_photo %}
+        <img src="{{ url_for('static', filename='img/mandy.jpg') }}" alt="Portrait of {{ p.nickname }}">
+      {% else %}
+        <span class="arch-initial" aria-hidden="true">M</span>
+      {% endif %}
+    </div>
+    <svg class="sticker" viewBox="0 0 200 200" role="img" aria-label="money is power">
+      <defs><path id="circ" d="M100,100 m-72,0 a72,72 0 1,1 144,0 a72,72 0 1,1 -144,0"/></defs>
+      <circle cx="100" cy="100" r="96" class="sticker-bg"/>
+      <text class="sticker-text"><textPath href="#circ" startOffset="0" textLength="440" lengthAdjust="spacing">money is power ✦ money is power ✦</textPath></text>
+      <text x="100" y="116" text-anchor="middle" class="sticker-mid">$</text>
+    </svg>
+  </div>
+</section>
+
+<section class="tiles" aria-label="Explore">
+  <a class="tile t1" href="{{ url_for('profile') }}">
+    <h2>Profile</h2>
+    <p>Who I am, where I studied, and what I'm good at.</p>
+  </a>
+  <a class="tile t2" href="{{ url_for('programs') }}">
+    <h2>Programs</h2>
+    <p>Uppercase converter plus circle and triangle areas, live.</p>
+  </a>
+  <a class="tile t3" href="{{ url_for('linked_list_page') }}">
+    <h2>Linked list</h2>
+    <p>Add, search, and reverse nodes you can see.</p>
+  </a>
+  <a class="tile t4" href="{{ url_for('contact') }}">
+    <h2>Contact</h2>
+    <p>Send me a message or find me online.</p>
+  </a>
+</section>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<section class="page-head">
+  <h1>{{ p.full_name }}</h1>
+  <p class="lead">{{ p.bio }}</p>
+</section>
+
+<section class="card pink about">
+  <h2 class="about-hello">A little bit about the person behind the screen ♡</h2>
+  <p><strong>Curious mind. Creative heart. Future engineer.</strong></p>
+  {% for line in p.about %}<p>{{ line }}</p>{% endfor %}
+</section>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Quick facts</h2>
+    <dl class="facts">
+      <dt>Program</dt><dd>{{ p.course }} ({{ p.course_short }})</dd>
+      <dt>Year level</dt><dd>{{ p.year }}</dd>
+      <dt>School</dt><dd>{{ p.school }}</dd>
+      <dt>Based in</dt><dd>{{ p.location }}</dd>
+      <dt>Motto</dt><dd>“{{ p.tagline }}”</dd>
+    </dl>
+  </article>
+
+  <article class="card pink">
+    <h2>Skills</h2>
+    <ul class="skills">
+      {% for s in p.skills %}
+      <li>
+        <div class="skill-row"><span>{{ s.name }}</span><span>{{ s.level }}%</span></div>
+        <div class="bar" role="progressbar" aria-valuenow="{{ s.level }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ s.name }}">
+          <span style="--w: {{ s.level }}%"></span>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+
+<section class="block">
+  <h2>Education</h2>
+  <ol class="timeline">
+    {% for e in p.education %}
+    <li>
+      <span class="badge">{{ e.honor }}</span>
+      <h3>{{ e.level }}</h3>
+      <p>{{ e.place }}</p>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section class="block">
+  <h2>Projects</h2>
+  <div class="projects">
+    {% for pr in p.projects %}
+    <a class="card project" href="{{ pr.url }}">
+      <h3>{{ pr.title }}</h3>
+      <p>{{ pr.desc }}</p>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="block">
+  <h2>Interests</h2>
+  <ul class="chips">
+    {% for i in p.interests %}<li>{{ i }}</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

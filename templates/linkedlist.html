@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Linked list{% endblock %}
+{% block content %}
+<section class="page-head">
+  <h1>Linked list</h1>
+  <p class="lead">A singly linked list written in Python (<code>linked_list.py</code>). Each box is a node that points to the next one.</p>
+</section>
+
+<section class="card ll-viz-card">
+  <div class="ll-meta"><span>Size: <strong id="ll-size">0</strong></span></div>
+  <div id="ll-viz" class="ll-viz" aria-label="Linked list nodes"></div>
+  <p id="ll-msg" class="ll-msg" aria-live="polite"></p>
+</section>
+
+<section class="grid-2">
+  <article class="card">
+    <h2>Add</h2>
+    <label for="ll-value">Value</label>
+    <input id="ll-value" type="text" maxlength="20" placeholder="e.g. Rizal">
+    <div class="btn-row">
+      <button class="btn" data-action="append">Add to end</button>
+      <button class="btn btn-ghost" data-action="prepend">Add to start</button>
+    </div>
+    <label for="ll-insert-index">Insert at index</label>
+    <div class="inline">
+      <input id="ll-insert-index" type="number" min="0" step="1" placeholder="0">
+      <button class="btn btn-ghost" data-action="insert">Insert</button>
+    </div>
+  </article>
+
+  <article class="card pink">
+    <h2>Find, remove, reorder</h2>
+    <div class="btn-row">
+      <button class="btn btn-ghost" data-action="search">Search value</button>
+      <button class="btn btn-ghost" data-action="remove">Remove value</button>
+    </div>
+    <label for="ll-remove-index">Remove at index</label>
+    <div class="inline">
+      <input id="ll-remove-index" type="number" min="0" step="1" placeholder="0">
+      <button class="btn btn-ghost" data-action="remove_at">Remove</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn" data-action="reverse">Reverse list</button>
+      <button class="btn btn-danger" data-action="clear">Clear all</button>
+    </div>
+  </article>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/linkedlist.js') }}"></script>{% endblock %}

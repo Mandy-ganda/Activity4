@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Programs{% endblock %}
+{% block content %}
+<section class="page-head">
+  <h1>Programming works</h1>
+  <p class="lead">Type your text or measurements and the result appears as you go. The math runs on the Flask server.</p>
+</section>
+
+<section class="card" id="upper-card">
+  <h2>Uppercase converter</h2>
+  <p class="formula">hello world → HELLO WORLD</p>
+  <label for="upper-in">Your text</label>
+  <textarea id="upper-in" rows="4" maxlength="5000" placeholder="Type or paste anything here"></textarea>
+  <label for="upper-out">Uppercase result</label>
+  <textarea id="upper-out" rows="4" readonly></textarea>
+  <div class="btn-row">
+    <button class="btn" id="upper-copy" type="button">Copy result</button>
+    <button class="btn btn-ghost" id="upper-clear" type="button">Clear</button>
+    <span class="upper-count" id="upper-count" aria-live="polite">0 characters</span>
+  </div>
+</section>
+
+<section class="grid-2">
+  <article class="card" id="circle-card">
+    <h2>Area of a circle</h2>
+    <p class="formula">A = π × r²</p>
+    <label for="radius">Radius</label>
+    <input id="radius" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 5">
+    <svg class="preview" viewBox="0 0 200 200" aria-hidden="true">
+      <circle id="circle-shape" cx="100" cy="100" r="60" class="shape"/>
+      <line id="circle-radius" x1="100" y1="100" x2="160" y2="100" class="shape-line"/>
+    </svg>
+    <div class="result" id="circle-result" aria-live="polite">Enter a radius to see the area.</div>
+  </article>
+
+  <article class="card pink" id="tri-card">
+    <h2>Area of a triangle</h2>
+    <div class="tabs" role="tablist">
+      <button class="tab active" role="tab" data-mode="bh" aria-selected="true">Base and height</button>
+      <button class="tab" role="tab" data-mode="sides" aria-selected="false">Three sides</button>
+    </div>
+    <p class="formula" id="tri-formula">A = ½ × b × h</p>
+
+    <div id="mode-bh">
+      <label for="base">Base</label>
+      <input id="base" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 8">
+      <label for="height">Height</label>
+      <input id="height" type="number" min="0" step="any" inputmode="decimal" placeholder="e.g. 5">
+    </div>
+    <div id="mode-sides" hidden>
+      <label for="sa">Side a</label><input id="sa" type="number" min="0" step="any" inputmode="decimal">
+      <label for="sb">Side b</label><input id="sb" type="number" min="0" step="any" inputmode="decimal">
+      <label for="sc">Side c</label><input id="sc" type="number" min="0" step="any" inputmode="decimal">
+    </div>
+
+    <svg class="preview" viewBox="0 0 200 200" aria-hidden="true">
+      <polygon id="tri-shape" points="30,160 170,160 100,50" class="shape"/>
+    </svg>
+    <div class="result" id="tri-result" aria-live="polite">Enter your measurements to see the area.</div>
+  </article>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/programs.js') }}"></script>{% endblock %}

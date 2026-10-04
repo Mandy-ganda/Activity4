@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Contact{% endblock %}
+{% block content %}
+<section class="page-head">
+  <h1>Contact {{ p.nickname }}</h1>
+  <p class="lead">Message me here, or reach me directly below.</p>
+</section>
+
+<section class="grid-2">
+  <article class="card pink">
+    <h2>Reach me</h2>
+    <dl class="facts">
+      <dt>Email</dt><dd><a href="mailto:{{ p.email }}">{{ p.email }}</a></dd>
+      <dt>Phone</dt><dd><a href="tel:{{ p.phone }}">{{ p.phone }}</a></dd>
+      <dt>Location</dt><dd>{{ p.location }}</dd>
+      {% for s in p.socials %}
+      <dt>{{ s.name }}</dt><dd><a href="{{ s.url }}" target="_blank" rel="noopener">Open {{ s.name }}</a></dd>
+      {% endfor %}
+    </dl>
+  </article>
+
+  <article class="card">
+    <h2>Send a message</h2>
+    <form method="post" action="{{ url_for('contact') }}">
+      <label for="name">Your name</label>
+      <input id="name" name="name" type="text" required>
+      <label for="email">Your email</label>
+      <input id="email" name="email" type="email" required>
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="5" required></textarea>
+      <button class="btn" type="submit">Send message</button>
+    </form>
+  </article>
+</section>
+{% endblock %}
