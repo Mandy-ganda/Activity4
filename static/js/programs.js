@@ -77,3 +77,33 @@ $('upper-copy').addEventListener('click', async (e) => {
   setTimeout(() => { btn.textContent = 'Copy result'; }, 1400);
 });
 $('upper-clear').addEventListener('click', () => { upIn.value = ''; upOut.value = ''; upCount.textContent = '0 characters'; upIn.focus(); });
+
+/* Infix to postfix */
+const inIn = $('infix-in'), inRes = $('postfix-result'), inSteps = $('postfix-steps');
+const inBody = inSteps.querySelector('tbody');
+const inRun = debounce(async () => {
+  const expression = inIn.value.trim();
+  if (!expression) {
+    inRes.className = 'result'; inRes.textContent = 'Type an expression to convert it.'; inSteps.hidden = true; return;
+  }
+  const data = await post('/api/infix-postfix', { expression });
+  if (!data.ok) { inRes.className = 'result err'; inRes.textContent = data.error; inSteps.hidden = true; return; }
+  inRes.className = 'result';
+  inRes.replaceChildren();
+  const big = document.createElement('span'); big.className = 'big'; big.textContent = data.postfix;
+  inRes.appendChild(big);
+  if (data.value !== null && data.value !== undefined) {
+    const v = document.createElement('span'); v.textContent = 'Value: ' + fmt(data.value); inRes.appendChild(v);
+  }
+  inBody.replaceChildren();
+  data.steps.forEach((s) => {
+    const tr = document.createElement('tr');
+    [s.token, s.action, s.stack, s.output].forEach((txt, i) => {
+      const td = document.createElement('td'); td.textContent = txt; if (i === 0) td.className = 'tok'; tr.appendChild(td);
+    });
+    inBody.appendChild(tr);
+  });
+  inSteps.hidden = false;
+}, 200);
+inIn.addEventListener('input', inRun);
+document.querySelectorAll('[data-ex]').forEach((b) => b.addEventListener('click', () => { inIn.value = b.dataset.ex; inRun(); inIn.focus(); }));

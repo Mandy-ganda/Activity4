@@ -6,6 +6,7 @@ from datetime import datetime
 from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
 
 from geometry import circle_area, triangle_area, triangle_area_sides
+from infix_postfix import evaluate_postfix, infix_to_postfix
 from linked_list import LinkedList
 
 app = Flask(__name__)
@@ -26,6 +27,7 @@ PROFILE = {
     "course_short": "BSCPE",
     "year": "2nd year",
     "school": "Polytechnic University of the Philippines",
+    ""
     "bio": (
         "Hi, I'm Mandy, a Computer Engineering student at PUP with a drive to "
         "succeed and a firm believer that money is power because of Toni Fowler."
@@ -61,6 +63,7 @@ PROFILE = {
     "projects": [
         {"title": "Portfolio Web App", "desc": "This personal site, built with Flask for Laboratory Exercise 4.", "url": "/"},
         {"title": "Uppercase Converter", "desc": "Turn any text into UPPERCASE letters instantly.", "url": "/programs"},
+        {"title": "Infix to Postfix", "desc": "Converts expressions using a stack, with a step-by-step table.", "url": "/programs"},
         {"title": "Area Calculator", "desc": "Circle and triangle areas with a live shape preview.", "url": "/programs"},
         {"title": "Linked List Visualizer", "desc": "A singly linked list you can add to, search, and reverse.", "url": "/linked-list"},
     ],
@@ -141,6 +144,20 @@ def api_uppercase():
     if len(text) > 5000:
         return jsonify(ok=False, error="Keep the text under 5,000 characters."), 400
     return jsonify(ok=True, result=text.upper(), length=len(text))
+
+
+@app.post("/api/infix-postfix")
+def api_infix_postfix():
+    data = request.get_json(silent=True) or {}
+    expr = data.get("expression", "")
+    if not isinstance(expr, str) or len(expr) > 200:
+        return jsonify(ok=False, error="Keep the expression under 200 characters."), 400
+    try:
+        postfix, steps = infix_to_postfix(expr)
+        value = evaluate_postfix(postfix)
+        return jsonify(ok=True, postfix=" ".join(postfix), steps=steps, value=value)
+    except (ValueError, OverflowError) as e:
+        return jsonify(ok=False, error=str(e)), 400
 
 
 @app.post("/api/area/circle")

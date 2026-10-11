@@ -208,3 +208,16 @@ form .btn{margin-top:1.2rem}
 .upper-count{font-weight:700;margin-left:auto}
 
 
+
+/* infix to postfix */
+#postfix-card{margin-bottom:1.5rem}
+.examples{margin:.8rem 0 0}
+.chip-btn{font:inherit;font-weight:700;color:var(--berry);background:var(--petal);border:2px solid var(--berry);border-radius:999px;padding:.25rem .9rem;cursor:pointer}
+.chip-btn:hover{background:var(--bubble);color:var(--on-accent)}
+.table-wrap{margin-top:1rem;overflow-x:auto;border:2px solid var(--berry);border-radius:16px;background:var(--white)}
+.steps{width:100%;border-collapse:collapse;font-size:.95rem}
+.steps th,.steps td{padding:.55rem .8rem;text-align:left;border-bottom:1px solid var(--petal);vertical-align:top}
+.steps th{background:var(--bubble);color:var(--on-accent);font-weight:700;white-space:nowrap}
+.steps tr:last-child td{border-bottom:0}
+.steps .tok{font-family:var(--display);color:var(--hot);font-size:1.1rem}
+.steps td:nth-child(3),.steps td:nth-child(4){font-family:ui-monospace,Consolas,monospace;white-space:nowrap}

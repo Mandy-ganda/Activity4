@@ -3,7 +3,7 @@
 {% block content %}
 <section class="page-head">
   <h1>Programming works</h1>
-  <p class="lead">Type your text or measurements and the result appears as you go. The math runs on the Flask server.</p>
+  <p class="lead">Type your text, expression, or measurements and the result appears as you go. The math runs on the Flask server.</p>
 </section>
 
 <section class="card" id="upper-card">
@@ -17,6 +17,26 @@
     <button class="btn" id="upper-copy" type="button">Copy result</button>
     <button class="btn btn-ghost" id="upper-clear" type="button">Clear</button>
     <span class="upper-count" id="upper-count" aria-live="polite">0 characters</span>
+  </div>
+</section>
+
+<section class="card pink" id="postfix-card">
+  <h2>Infix to postfix</h2>
+  <p class="formula">(A+B)*C → A B + C *</p>
+  <label for="infix-in">Infix expression</label>
+  <input id="infix-in" type="text" maxlength="200" placeholder="e.g. (A+B)*C or 3+4*2/(1-5)^2" autocomplete="off">
+  <div class="chips examples" aria-label="Examples">
+    <button type="button" class="chip-btn" data-ex="A+B*C">A+B*C</button>
+    <button type="button" class="chip-btn" data-ex="(A+B)*C">(A+B)*C</button>
+    <button type="button" class="chip-btn" data-ex="A^B^C">A^B^C</button>
+    <button type="button" class="chip-btn" data-ex="3+4*2/(1-5)^2">3+4*2/(1-5)^2</button>
+  </div>
+  <div class="result" id="postfix-result" aria-live="polite">Type an expression to convert it.</div>
+  <div class="table-wrap" id="postfix-steps" hidden>
+    <table class="steps">
+      <thead><tr><th>Token</th><th>Action</th><th>Stack</th><th>Output</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </div>
 </section>
 
