@@ -40,6 +40,28 @@
   </div>
 </section>
 
+<section class="card" id="queue-card">
+  <h2>Queue: enqueue and dequeue</h2>
+  <p class="formula">First in, first out (FIFO)</p>
+  <label for="q-value">Value to enqueue</label>
+  <div class="inline">
+    <input id="q-value" type="text" maxlength="20" placeholder="e.g. Rizal" autocomplete="off">
+    <button class="btn" type="button" data-q="enqueue">Enqueue</button>
+    <button class="btn btn-ghost" type="button" data-q="dequeue">Dequeue</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" type="button" data-q="peek">Peek front</button>
+    <button class="btn btn-danger" type="button" data-q="clear">Clear</button>
+    <span class="upper-count" id="q-size" aria-live="polite">0 / 10</span>
+  </div>
+  <div class="q-wrap">
+    <span class="q-end out">OUT ←</span>
+    <div id="q-viz" class="q-viz" aria-label="Queue items"></div>
+    <span class="q-end in">← IN</span>
+  </div>
+  <p id="q-msg" class="ll-msg" aria-live="polite"></p>
+</section>
+
 <section class="grid-2">
   <article class="card" id="circle-card">
     <h2>Area of a circle</h2>

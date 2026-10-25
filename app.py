@@ -8,6 +8,7 @@ from flask import Flask, flash, jsonify, redirect, render_template, request, url
 from geometry import circle_area, triangle_area, triangle_area_sides
 from infix_postfix import evaluate_postfix, infix_to_postfix
 from linked_list import LinkedList
+from queue_ds import Queue
 
 app = Flask(__name__)
 app.secret_key = "change-this-secret-key"
@@ -27,7 +28,6 @@ PROFILE = {
     "course_short": "BSCPE",
     "year": "2nd year",
     "school": "Polytechnic University of the Philippines",
-    ""
     "bio": (
         "Hi, I'm Mandy, a Computer Engineering student at PUP with a drive to "
         "succeed and a firm believer that money is power because of Toni Fowler."
@@ -64,6 +64,7 @@ PROFILE = {
         {"title": "Portfolio Web App", "desc": "This personal site, built with Flask for Laboratory Exercise 4.", "url": "/"},
         {"title": "Uppercase Converter", "desc": "Turn any text into UPPERCASE letters instantly.", "url": "/programs"},
         {"title": "Infix to Postfix", "desc": "Converts expressions using a stack, with a step-by-step table.", "url": "/programs"},
+        {"title": "Queue", "desc": "Enqueue and dequeue items in first-in, first-out order.", "url": "/programs"},
         {"title": "Area Calculator", "desc": "Circle and triangle areas with a live shape preview.", "url": "/programs"},
         {"title": "Linked List Visualizer", "desc": "A singly linked list you can add to, search, and reverse.", "url": "/linked-list"},
     ],
@@ -257,6 +258,46 @@ def ll_action(action):
     except (ValueError, IndexError) as e:
         return _state(str(e), ok=False, status=400)
     return _state("Unknown action.", ok=False, status=404)
+
+
+# ---------------------------------------------------------------------------
+# Queue API (enqueue / dequeue)
+# ---------------------------------------------------------------------------
+Q = Queue(capacity=10)
+for _v in ("Mandy", "PUP"):
+    Q.enqueue(_v)
+
+
+def _qstate(message, ok=True, status=200, highlight=None, removed=None):
+    return jsonify(ok=ok, message=message, items=Q.to_list(), size=len(Q),
+                   capacity=Q.capacity, highlight=highlight, removed=removed), status
+
+
+@app.get("/api/queue")
+def q_get():
+    return _qstate("Here is your queue.")
+
+
+@app.post("/api/queue/<action>")
+def q_action(action):
+    data = request.get_json(silent=True) or {}
+    try:
+        if action == "enqueue":
+            v = _value(data)
+            Q.enqueue(v)
+            return _qstate(f'Enqueued "{v}" at the rear.', highlight="rear")
+        if action == "dequeue":
+            v = Q.dequeue()
+            return _qstate(f'Dequeued "{v}" from the front.', removed=v)
+        if action == "peek":
+            v = Q.peek()
+            return _qstate(f'Front of the queue is "{v}".', highlight="front")
+        if action == "clear":
+            Q.clear()
+            return _qstate("Queue cleared.")
+    except (ValueError, IndexError, OverflowError) as e:
+        return _qstate(str(e), ok=False, status=400)
+    return _qstate("Unknown action.", ok=False, status=404)
 
 
 if __name__ == "__main__":

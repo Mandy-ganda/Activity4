@@ -107,3 +107,31 @@ const inRun = debounce(async () => {
 }, 200);
 inIn.addEventListener('input', inRun);
 document.querySelectorAll('[data-ex]').forEach((b) => b.addEventListener('click', () => { inIn.value = b.dataset.ex; inRun(); inIn.focus(); }));
+
+/* Queue: enqueue and dequeue */
+const qViz = $('q-viz'), qMsg = $('q-msg'), qSize = $('q-size'), qVal = $('q-value');
+function qEl(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+function qRender(d) {
+  qViz.replaceChildren();
+  if (!d.items.length) qViz.appendChild(qEl('span', 'q-empty', 'Queue is empty'));
+  d.items.forEach((v, i) => {
+    const last = d.items.length - 1;
+    const hit = (d.highlight === 'front' && i === 0) || (d.highlight === 'rear' && i === last);
+    const node = qEl('div', 'q-item' + (hit ? ' hit' : ''));
+    node.appendChild(qEl('span', 'q-tag', i === 0 && i === last ? 'FRONT / REAR' : i === 0 ? 'FRONT' : i === last ? 'REAR' : ' '));
+    node.appendChild(qEl('div', 'q-box', v));
+    qViz.appendChild(node);
+  });
+  qSize.textContent = d.size + ' / ' + d.capacity;
+  qMsg.textContent = d.message;
+  qMsg.className = 'll-msg' + (d.ok ? '' : ' err');
+}
+async function qAct(action) {
+  const res = await fetch('/api/queue/' + action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: qVal.value }) });
+  const d = await res.json();
+  qRender(d);
+  if (d.ok && action === 'enqueue') { qVal.value = ''; qVal.focus(); }
+}
+document.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => qAct(b.dataset.q)));
+qVal.addEventListener('keydown', (e) => { if (e.key === 'Enter') qAct('enqueue'); });
+fetch('/api/queue').then((r) => r.json()).then(qRender);
