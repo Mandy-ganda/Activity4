@@ -135,3 +135,120 @@ async function qAct(action) {
 document.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => qAct(b.dataset.q)));
 qVal.addEventListener('keydown', (e) => { if (e.key === 'Enter') qAct('enqueue'); });
 fetch('/api/queue').then((r) => r.json()).then(qRender);
+
+/* Sorting algorithms */
+(function () {
+  const info = JSON.parse($('sort-info-data').textContent);
+  const tabs = [...document.querySelectorAll('#sort-tabs .tab')];
+  const input = $('sort-in'), viz = $('sort-viz'), msg = $('sort-msg'), stats = $('sort-stats'), done = $('sort-done');
+  const playBtn = $('sort-play'), backBtn = $('sort-back'), nextBtn = $('sort-next'), speedEl = $('sort-speed');
+  const SPEEDS = [1200, 800, 500, 300, 150];
+  const LECTURE = { merge: [35, 22, 90, 4, 50, 20, 30, 40, 1], other: [4, 3, 7, 1, 5] };
+  let algo = 'bubble', frames = [], idx = 0, timer = null, lastKey = '', moves = 'Swaps';
+
+  function parse() {
+    const parts = input.value.trim().split(/[\s,]+/).filter(Boolean);
+    if (parts.length < 2 || parts.length > 12) throw new Error('Enter 2 to 12 whole numbers.');
+    return parts.map((p) => {
+      if (!/^-?\d+$/.test(p)) throw new Error('"' + p + '" is not a whole number.');
+      const n = parseInt(p, 10);
+      if (Math.abs(n) > 999) throw new Error('Keep each number between -999 and 999.');
+      return n;
+    });
+  }
+  function say(text, isErr) { msg.textContent = text; msg.className = 'sort-msg' + (isErr ? ' err' : ''); }
+
+  function draw(f) {
+    viz.replaceChildren();
+    const inRange = f.range ? (i) => i >= f.range[0] && i <= f.range[1] : () => true;
+    f.a.forEach((v, i) => {
+      const box = document.createElement('div');
+      let cls = 'sbox';
+      if (f.range && !inRange(i)) cls += ' dim';
+      if (f.sorted.includes(i)) cls += ' sorted';
+      if (f.mark === i) cls += ' mark';
+      if (f.cmp.includes(i)) cls += ' cmp';
+      if (f.swap.includes(i)) cls += ' swap';
+      box.className = cls;
+      const num = document.createElement('span'); num.className = 'sval'; num.textContent = v;
+      const ix = document.createElement('span'); ix.className = 'sidx'; ix.textContent = i;
+      box.append(num, ix);
+      viz.appendChild(box);
+    });
+  }
+  const plain = (a) => ({ a, cmp: [], swap: [], mark: null, range: null, sorted: [] });
+
+  function showInfo() {
+    const s = info[algo];
+    $('si-def').textContent = s.definition;
+    $('si-best').replaceChildren(...s.best_for.map((t) => { const li = document.createElement('li'); li.textContent = t; return li; }));
+    $('si-best-t').textContent = s.best_time; $('si-avg-t').textContent = s.avg_time;
+    $('si-worst-t').textContent = s.worst_time; $('si-space').textContent = s.space;
+    document.querySelectorAll('#complexity-table tbody tr').forEach((tr) => tr.classList.toggle('current', tr.dataset.algo === algo));
+    moves = s.moves_label;
+  }
+
+  function setIdx(i) {
+    idx = Math.max(0, Math.min(frames.length - 1, i));
+    const f = frames[idx];
+    draw(f); say(f.msg);
+    stats.textContent = 'Step ' + (idx + 1) + ' of ' + frames.length + '  ·  Comparisons: ' + f.c + '  ·  ' + moves + ': ' + f.s;
+    backBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === frames.length - 1;
+    if (idx === frames.length - 1) done.textContent = info[algo].name + ' finished with ' + f.c + ' comparisons and ' + f.s + ' ' + moves.toLowerCase() + '.';
+  }
+
+  function invalidate() {
+    pause(); frames = []; lastKey = ''; stats.textContent = ''; done.textContent = '';
+    backBtn.disabled = nextBtn.disabled = false;
+    try { draw(plain(parse())); say('Press “Sort and play” to start.'); }
+    catch (e) { viz.replaceChildren(); say(e.message, true); }
+  }
+
+  async function ensure() {
+    let values;
+    try { values = parse(); } catch (e) { say(e.message, true); return false; }
+    const key = algo + '|' + values.join(',');
+    if (key === lastKey && frames.length) return true;
+    const res = await fetch('/api/sort', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ algorithm: algo, values }) });
+    const data = await res.json();
+    if (!data.ok) { say(data.error, true); return false; }
+    frames = data.frames; lastKey = key; moves = data.moves_label; setIdx(0);
+    return true;
+  }
+
+  function pause() { if (timer) { clearInterval(timer); timer = null; } playBtn.textContent = '▶ Sort and play'; }
+  function startTimer() {
+    clearInterval(timer);
+    timer = setInterval(() => { if (idx >= frames.length - 1) { pause(); return; } setIdx(idx + 1); }, SPEEDS[speedEl.value - 1]);
+    playBtn.textContent = '⏸ Pause';
+  }
+  async function play() {
+    if (timer) { pause(); return; }
+    if (!(await ensure())) return;
+    if (idx >= frames.length - 1) setIdx(0);
+    startTimer();
+  }
+
+  tabs.forEach((t) => t.addEventListener('click', () => {
+    algo = t.dataset.algo;
+    tabs.forEach((x) => { const on = x === t; x.classList.toggle('active', on); x.setAttribute('aria-selected', on); });
+    showInfo(); invalidate();
+  }));
+  input.addEventListener('input', invalidate);
+  playBtn.addEventListener('click', play);
+  nextBtn.addEventListener('click', async () => { pause(); if (await ensure()) setIdx(idx + 1); });
+  backBtn.addEventListener('click', async () => { pause(); if (await ensure()) setIdx(idx - 1); });
+  $('sort-reset').addEventListener('click', () => { pause(); if (frames.length) { setIdx(0); } else invalidate(); });
+  speedEl.addEventListener('input', () => { if (timer) startTimer(); });
+  $('sort-random').addEventListener('click', () => {
+    const set = new Set();
+    while (set.size < 8) set.add(1 + Math.floor(Math.random() * 99));
+    input.value = [...set].join(', '); invalidate();
+  });
+  $('sort-example').addEventListener('click', () => {
+    input.value = (algo === 'merge' ? LECTURE.merge : LECTURE.other).join(', '); invalidate();
+  });
+
+  showInfo(); invalidate();
+})();

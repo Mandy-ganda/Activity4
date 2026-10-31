@@ -6,6 +6,16 @@
   <p class="lead">Type your text, expression, or measurements and the result appears as you go. The math runs on the Flask server.</p>
 </section>
 
+<nav class="jump" aria-label="Jump to a program">
+  <span>Jump to:</span>
+  <a href="#upper-card">Uppercase</a>
+  <a href="#postfix-card">Infix to postfix</a>
+  <a href="#queue-card">Queue</a>
+  <a href="#sort-card">Sorting</a>
+  <a href="#circle-card">Circle area</a>
+  <a href="#tri-card">Triangle area</a>
+</nav>
+
 <section class="card" id="upper-card">
   <h2>Uppercase converter</h2>
   <p class="formula">hello world → HELLO WORLD</p>
@@ -60,6 +70,77 @@
     <span class="q-end in">← IN</span>
   </div>
   <p id="q-msg" class="ll-msg" aria-live="polite"></p>
+</section>
+
+<section class="card pink" id="sort-card">
+  <h2>Sorting algorithms</h2>
+  <p class="formula">Watch each algorithm sort your numbers, one step at a time</p>
+
+  <div class="tabs" role="tablist" aria-label="Sorting algorithm" id="sort-tabs">
+    {% for key in sort_order %}
+    <button class="tab{% if loop.first %} active{% endif %}" role="tab" type="button" data-algo="{{ key }}" aria-selected="{{ 'true' if loop.first else 'false' }}">{{ sort_info[key].name }}</button>
+    {% endfor %}
+  </div>
+
+  <div class="sort-info">
+    <p id="si-def"></p>
+    <p class="si-label">Best used when</p>
+    <ul id="si-best"></ul>
+    <ul class="complexity" aria-label="Complexity">
+      <li><span>Best case</span><b id="si-best-t"></b></li>
+      <li><span>Average case</span><b id="si-avg-t"></b></li>
+      <li><span>Worst case</span><b id="si-worst-t"></b></li>
+      <li><span>Space</span><b id="si-space"></b></li>
+    </ul>
+  </div>
+
+  <label for="sort-in">Numbers to sort (2 to 12 whole numbers, separated by commas)</label>
+  <div class="inline">
+    <input id="sort-in" type="text" value="4, 3, 7, 1, 5" autocomplete="off" inputmode="numeric">
+    <button class="btn btn-ghost" type="button" id="sort-random">Random</button>
+    <button class="btn btn-ghost" type="button" id="sort-example">Lecture example</button>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn" type="button" id="sort-play">▶ Sort and play</button>
+    <button class="btn btn-ghost" type="button" id="sort-back">◀ Back</button>
+    <button class="btn btn-ghost" type="button" id="sort-next">Step ▶</button>
+    <button class="btn btn-ghost" type="button" id="sort-reset">Reset</button>
+    <label class="speed" for="sort-speed">Speed <input id="sort-speed" type="range" min="1" max="5" value="3"></label>
+  </div>
+
+  <div id="sort-viz" class="sort-viz" aria-label="Array being sorted"></div>
+  <p id="sort-msg" class="sort-msg">Press “Sort and play” to start.</p>
+  <p id="sort-stats" class="sort-stats"></p>
+  <p id="sort-done" class="sr-only" aria-live="polite"></p>
+
+  <ul class="legend" aria-label="Colour key">
+    <li><i class="k k-cmp"></i>Comparing</li>
+    <li><i class="k k-swap"></i>Swapping / moving</li>
+    <li><i class="k k-mark"></i>Pivot / lowest / current item</li>
+    <li><i class="k k-sorted"></i>Sorted</li>
+  </ul>
+
+  <h3>Time and space complexity</h3>
+  <div class="table-wrap">
+    <table class="steps" id="complexity-table">
+      <thead><tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th></tr></thead>
+      <tbody>
+        {% for key in sort_order %}{% set s = sort_info[key] %}
+        <tr data-algo="{{ key }}"><td>{{ s.name }}</td><td>{{ s.best_time }}</td><td>{{ s.avg_time }}</td><td>{{ s.worst_time }}</td><td>{{ s.space }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Which one should I use?</h3>
+  <ul class="advice">
+    <li><b>Small lists:</b> insertion sort or bubble sort are the simplest choices.</li>
+    <li><b>Large lists:</b> merge sort or quick sort, thanks to their O(n log n) speed.</li>
+    <li><b>Memory is tight:</b> quick sort, because it has a smaller memory footprint than merge sort.</li>
+    <li><b>Stability needed</b> (equal items keep their order): merge sort is stable, while the standard in-place quick sort is not.</li>
+  </ul>
+  <script id="sort-info-data" type="application/json">{{ sort_info|tojson }}</script>
 </section>
 
 <section class="grid-2">

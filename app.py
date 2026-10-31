@@ -9,6 +9,7 @@ from geometry import circle_area, triangle_area, triangle_area_sides
 from infix_postfix import evaluate_postfix, infix_to_postfix
 from linked_list import LinkedList
 from queue_ds import Queue
+from sorting_algos import SORT_INFO, SORT_ORDER, run_sort
 
 app = Flask(__name__)
 app.secret_key = "change-this-secret-key"
@@ -65,6 +66,7 @@ PROFILE = {
         {"title": "Uppercase Converter", "desc": "Turn any text into UPPERCASE letters instantly.", "url": "/programs"},
         {"title": "Infix to Postfix", "desc": "Converts expressions using a stack, with a step-by-step table.", "url": "/programs"},
         {"title": "Queue", "desc": "Enqueue and dequeue items in first-in, first-out order.", "url": "/programs"},
+        {"title": "Sorting Visualizer", "desc": "Bubble, selection, insertion, merge, and quick sort, replayed step by step.", "url": "/programs"},
         {"title": "Area Calculator", "desc": "Circle and triangle areas with a live shape preview.", "url": "/programs"},
         {"title": "Linked List Visualizer", "desc": "A singly linked list you can add to, search, and reverse.", "url": "/linked-list"},
     ],
@@ -92,7 +94,7 @@ def profile():
 
 @app.route("/programs")
 def programs():
-    return render_template("programs.html")
+    return render_template("programs.html", sort_info=SORT_INFO, sort_order=SORT_ORDER)
 
 
 @app.route("/linked-list")
@@ -158,6 +160,16 @@ def api_infix_postfix():
         value = evaluate_postfix(postfix)
         return jsonify(ok=True, postfix=" ".join(postfix), steps=steps, value=value)
     except (ValueError, OverflowError) as e:
+        return jsonify(ok=False, error=str(e)), 400
+
+
+@app.post("/api/sort")
+def api_sort():
+    data = request.get_json(silent=True) or {}
+    try:
+        result = run_sort(data.get("algorithm"), data.get("values"))
+        return jsonify(ok=True, **result)
+    except ValueError as e:
         return jsonify(ok=False, error=str(e)), 400
 
 
