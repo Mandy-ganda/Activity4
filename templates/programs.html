@@ -12,6 +12,7 @@
   <a href="#postfix-card">Infix to postfix</a>
   <a href="#queue-card">Queue</a>
   <a href="#sort-card">Sorting</a>
+  <a href="#tree-card">Binary tree</a>
   <a href="#circle-card">Circle area</a>
   <a href="#tri-card">Triangle area</a>
 </nav>
@@ -141,6 +142,47 @@
     <li><b>Stability needed</b> (equal items keep their order): merge sort is stable, while the standard in-place quick sort is not.</li>
   </ul>
   <script id="sort-info-data" type="application/json">{{ sort_info|tojson }}</script>
+</section>
+
+<section class="card pink" id="tree-card">
+  <h2>Binary tree</h2>
+  <p class="formula">Binary search tree: smaller on the left, larger on the right</p>
+
+  <label for="t-value">Number (whole number, -999 to 999)</label>
+  <div class="inline">
+    <input id="t-value" type="text" inputmode="numeric" placeholder="e.g. 45" autocomplete="off">
+    <button class="btn" type="button" data-t="insert">Insert</button>
+    <button class="btn btn-ghost" type="button" data-t="search">Search</button>
+    <button class="btn btn-ghost" type="button" data-t="delete">Delete</button>
+  </div>
+  <div class="btn-row">
+    <button class="btn" type="button" data-t="post">Post-order traversal</button>
+    <button class="btn btn-ghost" type="button" data-t="inorder">In-order</button>
+    <button class="btn btn-ghost" type="button" data-t="preorder">Pre-order</button>
+    <button class="btn btn-ghost" type="button" data-t="sample">Load sample</button>
+    <button class="btn btn-danger" type="button" data-t="clear">Clear</button>
+    <span class="upper-count" id="t-meta"></span>
+  </div>
+
+  <div class="tree-wrap"><svg id="t-svg" role="img" aria-label="Binary tree"></svg></div>
+  <p id="t-msg" class="ll-msg" aria-live="polite"></p>
+  <p id="t-order" class="t-order"></p>
+
+  <ul class="legend" aria-label="Colour key">
+    <li><i class="k k-mark"></i>Visited while searching</li>
+    <li><i class="k k-swap"></i>Found</li>
+    <li><i class="k k-cmp"></i>New / current node</li>
+    <li><i class="k k-sorted"></i>Already traversed</li>
+  </ul>
+
+  <details class="how">
+    <summary>How the three lab methods work</summary>
+    <ul class="advice">
+      <li><b><code>search(self, root, key)</code></b> compares the key with the current node. Equal means found. Smaller means go left, larger means go right. If it reaches nothing (None), the key is not in the tree.</li>
+      <li><b><code>post_traversal(self, start, traversal)</code></b> visits the left subtree, then the right subtree, then the node itself (left, right, root). Call it with <code>tree.post_traversal(tree.root, "")</code> and it returns the keys as one string.</li>
+      <li><b><code>delete_node(self, root, key)</code></b> finds the node, then handles three cases. A leaf is removed. A node with one child is replaced by that child. A node with two children copies its in-order successor (the smallest key on the right), then deletes that successor. It returns the new root of the subtree.</li>
+    </ul>
+  </details>
 </section>
 
 <section class="grid-2">

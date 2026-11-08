@@ -141,7 +141,7 @@ form .btn{margin-top:1.2rem}
 .ll-msg{margin:0;font-weight:700;min-height:1.6em}
 .ll-msg.err{color:var(--hot)}
 .btn-row{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0 .4rem}
-.inline{display:flex;gap:.6rem}.inline input{flex:1}
+.inline{display:flex;flex-wrap:wrap;gap:.6rem}.inline input{flex:1 1 150px;min-width:0}
 
 .footer{position:relative;z-index:1;text-align:center;padding:2rem 1rem 2.5rem;font-weight:500}
 .footer p{margin:0}.footer-quote{font-family:var(--display);color:var(--hot);font-size:1.2rem}
@@ -278,4 +278,23 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .jump span{font-weight:700}
 .jump a{text-decoration:none;color:var(--berry);background:var(--white);border:2px solid var(--berry);border-radius:999px;padding:.25rem .9rem;font-weight:700;font-size:.95rem}
 .jump a:hover{background:var(--bubble);color:var(--on-accent)}
-#upper-card,#postfix-card,#queue-card,#sort-card,#circle-card,#tri-card{scroll-margin-top:100px}
+#upper-card,#postfix-card,#queue-card,#sort-card,#tree-card,#circle-card,#tri-card{scroll-margin-top:100px}
+
+/* binary tree */
+#tree-card{margin-bottom:1.5rem}
+.tree-wrap{margin-top:1rem;padding:.8rem;overflow-x:auto;border:2px dashed var(--berry);border-radius:16px;background:var(--paper)}
+#t-svg{display:block;margin:0 auto;max-width:none}
+.tedge{stroke:var(--berry);stroke-width:2.5;stroke-linecap:round}
+.tnode circle{fill:var(--blush);stroke:var(--berry);stroke-width:2.5;transition:fill .25s}
+.tnode text{font-family:var(--display);font-size:16px;fill:var(--berry);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.tnode.seen circle{fill:var(--sorted)}
+.tnode.visit circle{fill:var(--peach)}
+.tnode.current circle{fill:var(--bubble);stroke-width:4.5}
+.tnode.found circle{fill:var(--hot)}
+.tnode.seen text,.tnode.visit text,.tnode.current text{fill:var(--on-accent)}
+.tnode.found text{fill:var(--on-hot)}
+.tempty{font-family:var(--display);font-size:20px;fill:var(--berry);text-anchor:middle;dominant-baseline:central}
+.t-order{margin:.2rem 0 0;font-weight:700;min-height:1.5em;word-break:break-word}
+.how{margin-top:1.2rem;border:2px solid var(--berry);border-radius:14px;padding:.6rem 1rem;background:var(--white)}
+.how summary{cursor:pointer;font-weight:700}
+.how code{background:var(--blush);padding:.05rem .35rem;border-radius:6px;font-size:.9em}

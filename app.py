@@ -7,6 +7,7 @@ from flask import Flask, flash, jsonify, redirect, render_template, request, url
 
 from geometry import circle_area, triangle_area, triangle_area_sides
 from infix_postfix import evaluate_postfix, infix_to_postfix
+from binary_tree import BinaryTree
 from linked_list import LinkedList
 from queue_ds import Queue
 from sorting_algos import SORT_INFO, SORT_ORDER, run_sort
@@ -67,6 +68,7 @@ PROFILE = {
         {"title": "Infix to Postfix", "desc": "Converts expressions using a stack, with a step-by-step table.", "url": "/programs"},
         {"title": "Queue", "desc": "Enqueue and dequeue items in first-in, first-out order.", "url": "/programs"},
         {"title": "Sorting Visualizer", "desc": "Bubble, selection, insertion, merge, and quick sort, replayed step by step.", "url": "/programs"},
+        {"title": "Binary Tree", "desc": "Insert, search, delete, and post-order traversal on a binary search tree.", "url": "/programs"},
         {"title": "Area Calculator", "desc": "Circle and triangle areas with a live shape preview.", "url": "/programs"},
         {"title": "Linked List Visualizer", "desc": "A singly linked list you can add to, search, and reverse.", "url": "/linked-list"},
     ],
@@ -310,6 +312,93 @@ def q_action(action):
     except (ValueError, IndexError, OverflowError) as e:
         return _qstate(str(e), ok=False, status=400)
     return _qstate("Unknown action.", ok=False, status=404)
+
+
+# ---------------------------------------------------------------------------
+# Binary tree API (insert / search / post-order / delete)
+# ---------------------------------------------------------------------------
+TREE = BinaryTree()
+SAMPLE_TREE = (50, 30, 70, 20, 40, 60, 80)
+MAX_TREE_NODES = 15
+for _v in SAMPLE_TREE:
+    TREE.insert(_v)
+
+
+def _tstate(message, ok=True, status=200, **extra):
+    return jsonify(ok=ok, message=message, tree=TREE.to_dict(), size=TREE.size(),
+                   height=TREE.height(), **extra), status
+
+
+def _tree_value(data):
+    raw = str(data.get("value", "")).strip()
+    try:
+        v = int(raw)
+    except ValueError:
+        raise ValueError("Enter a whole number.")
+    if abs(v) > 999:
+        raise ValueError("Keep the number between -999 and 999.")
+    return v
+
+
+@app.get("/api/tree")
+def tree_get():
+    return _tstate("Here is your binary tree.")
+
+
+@app.post("/api/tree/<action>")
+def tree_action(action):
+    data = request.get_json(silent=True) or {}
+    try:
+        if action == "insert":
+            v = _tree_value(data)
+            if TREE.size() >= MAX_TREE_NODES:
+                raise ValueError(f"The tree is full (maximum {MAX_TREE_NODES} nodes).")
+            if not TREE.insert(v):
+                raise ValueError(f"{v} is already in the tree.")
+            path = TREE.path_to(v)
+            where = "as the root" if len(path) == 1 else f"after visiting {' → '.join(map(str, path[:-1]))}"
+            return _tstate(f"Inserted {v} {where}.", path=path, highlight=v)
+        if action == "search":
+            v = _tree_value(data)
+            path = TREE.path_to(v)
+            node = TREE.search(TREE.root, v)
+            route = " → ".join(map(str, path)) if path else "nothing (empty tree)"
+            if node is None:
+                return _tstate(f"{v} is not in the tree. Visited: {route}.", ok=False, status=404, path=path, found=None)
+            return _tstate(f"Found {v}! Visited: {route}.", path=path, found=v)
+        if action == "delete":
+            v = _tree_value(data)
+            node = TREE.search(TREE.root, v)
+            if node is None:
+                raise ValueError(f"{v} is not in the tree, so nothing was deleted.")
+            if node.left and node.right:
+                succ = TREE.min_node(node.right).key
+                how = f"it has two children, so it was replaced by its in-order successor {succ}"
+            elif node.left or node.right:
+                how = "it has one child, so that child took its place"
+            else:
+                how = "it is a leaf, so it was simply removed"
+            TREE.delete(v)
+            return _tstate(f"Deleted {v}: {how}.")
+        if action in ("post", "inorder", "preorder"):
+            if TREE.root is None:
+                raise ValueError("The tree is empty. Insert some numbers first.")
+            fn, label = {"post": (TREE.post_traversal, "Post-order (left, right, root)"),
+                         "inorder": (TREE.in_traversal, "In-order (left, root, right)"),
+                         "preorder": (TREE.pre_traversal, "Pre-order (root, left, right)")}[action]
+            order = [int(x) for x in fn(TREE.root, "").split()]
+            return _tstate(f"{label}: {' → '.join(map(str, order))}", order=order, order_name=label)
+        if action == "clear":
+            TREE.clear()
+            return _tstate("Tree cleared. Insert a number to start again.")
+        if action == "sample":
+            TREE.clear()
+            for v in SAMPLE_TREE:
+                TREE.insert(v)
+            return _tstate("Sample tree loaded.")
+    except ValueError as e:
+        return _tstate(str(e), ok=False, status=400)
+    return _tstate("Unknown action.", ok=False, status=404)
 
 
 if __name__ == "__main__":

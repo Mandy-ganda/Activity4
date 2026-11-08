@@ -252,3 +252,101 @@ fetch('/api/queue').then((r) => r.json()).then(qRender);
 
   showInfo(); invalidate();
 })();
+
+/* Binary tree */
+(function () {
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = $('t-svg'), msg = $('t-msg'), out = $('t-order'), valEl = $('t-value'), meta = $('t-meta');
+  const GAP_X = 56, GAP_Y = 64, PAD = 34;
+  let token = 0;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  function mk(tag, attrs) {
+    const e = document.createElementNS(NS, tag);
+    Object.entries(attrs || {}).forEach(([k, v]) => e.setAttribute(k, v));
+    return e;
+  }
+  function layout(tree) {
+    const pos = new Map(); let i = 0, maxD = 0;
+    (function walk(n, d) {
+      if (!n) return;
+      walk(n.left, d + 1);
+      pos.set(n.value, { x: i++, d }); maxD = Math.max(maxD, d);
+      walk(n.right, d + 1);
+    })(tree, 0);
+    return { pos, count: i, maxD };
+  }
+  function render(data) {
+    svg.replaceChildren();
+    meta.textContent = 'Nodes: ' + data.size + ' / 15  ·  Height: ' + data.height;
+    if (!data.tree) {
+      svg.setAttribute('viewBox', '0 0 300 90'); svg.style.width = '300px';
+      const t = mk('text', { x: 150, y: 48, class: 'tempty' }); t.textContent = 'The tree is empty'; svg.appendChild(t);
+      svg.setAttribute('aria-label', 'Empty binary tree');
+      return;
+    }
+    const { pos, count, maxD } = layout(data.tree);
+    const W = PAD * 2 + Math.max(count - 1, 1) * GAP_X, H = PAD * 2 + maxD * GAP_Y;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.style.width = W + 'px'; svg.style.height = H + 'px';
+    const px = (v) => PAD + pos.get(v).x * GAP_X, py = (v) => PAD + pos.get(v).d * GAP_Y;
+    const edges = mk('g'), nodes = mk('g'), inorder = [];
+    (function walk(n) {
+      if (!n) return;
+      walk(n.left); inorder.push(n.value); walk(n.right);
+      [n.left, n.right].forEach((c) => {
+        if (c) edges.appendChild(mk('line', { class: 'tedge', x1: px(n.value), y1: py(n.value), x2: px(c.value), y2: py(c.value) }));
+      });
+    })(data.tree);
+    inorder.forEach((v) => {
+      const g = mk('g', { class: 'tnode', 'data-v': v, transform: 'translate(' + px(v) + ' ' + py(v) + ')' });
+      g.appendChild(mk('circle', { r: 21 }));
+      const t = mk('text', {}); t.textContent = v; g.appendChild(t);
+      nodes.appendChild(g);
+    });
+    svg.append(edges, nodes);
+    svg.setAttribute('aria-label', 'Binary tree. Values from smallest to largest: ' + inorder.join(', '));
+  }
+  const node = (v) => svg.querySelector('[data-v="' + v + '"]');
+  const mark = (v, cls) => { const n = node(v); if (n) n.classList.add(cls); };
+  const unmark = (v, cls) => { const n = node(v); if (n) n.classList.remove(cls); };
+
+  async function walkNodes(values, keep, onEach) {
+    const my = ++token;
+    for (let i = 0; i < values.length; i++) {
+      if (my !== token) return false;
+      mark(values[i], 'current');
+      if (onEach) onEach(i);
+      await sleep(520);
+      if (my !== token) return false;
+      unmark(values[i], 'current'); mark(values[i], keep);
+    }
+    return my === token;
+  }
+  function say(text, isErr) { msg.textContent = text; msg.className = 'll-msg' + (isErr ? ' err' : ''); }
+
+  async function act(action) {
+    token++;                       // cancel any animation still running
+    out.textContent = '';
+    const res = await fetch('/api/tree/' + action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value: valEl.value }) });
+    const d = await res.json();
+    render(d);
+    say(d.message, !d.ok);
+    if (!d.ok && !d.path) return;
+    if (action === 'insert' && d.ok) { valEl.value = ''; valEl.focus(); mark(d.highlight, 'current'); }
+    if (action === 'search') {
+      const finished = await walkNodes(d.path || [], 'visit');
+      if (finished && d.found !== null && d.found !== undefined) mark(d.found, 'found');
+    }
+    if (d.order) {
+      say('Walking through the tree…');
+      out.textContent = d.order_name.split(' (')[0] + ': ';
+      const finished = await walkNodes(d.order, 'seen', (i) => {
+        out.textContent = d.order_name.split(' (')[0] + ': ' + d.order.slice(0, i + 1).join(' → ');
+      });
+      if (finished) { out.textContent = d.order_name + ': ' + d.order.join(' → '); say('Done! Visited ' + d.order.length + ' nodes.'); }
+    }
+  }
+  document.querySelectorAll('[data-t]').forEach((b) => b.addEventListener('click', () => act(b.dataset.t)));
+  valEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') act('insert'); });
+  fetch('/api/tree').then((r) => r.json()).then((d) => { render(d); say('Try inserting 45, then press Post-order traversal.'); });
+})();
